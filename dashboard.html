@@ -4,175 +4,108 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Owner Dashboard</title>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
 
-  :root{
-    --cream:#FBF4E6; --ink:#2B2118; --terracotta:#C1582B;
-    --terracotta-dark:#9E4521; --leaf:#5B7A4F; --line:#E3D5BC;
-    --card:#FFFDF8; --pending:#A33B3B; --making:#B98A2E; --done:#5B7A4F;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--cream);color:var(--ink);font-family:'Manrope',sans-serif;min-height:100vh;}
+:root{
+  --cream:#FBF4E6; --ink:#2B2118; --terracotta:#C1582B;
+  --terracotta-dark:#9E4521; --leaf:#5B7A4F; --line:#E3D5BC;
+  --card:#FFFDF8; --pending:#A33B3B; --making:#B98A2E; --done:#5B7A4F;
+}
 
-  header{padding:24px 20px 18px;background:var(--ink);color:var(--cream);display:flex;justify-content:space-between;align-items:flex-start;}
-  .dash-title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;}
-  .dash-sub{font-size:13px;color:#C9A876;margin-top:3px;}
-  .logout-btn{background:none;border:1.5px solid #6B5C48;color:var(--cream);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Manrope',sans-serif;min-height:100vh;}
 
-  .tab-row{display:flex;gap:6px;padding:14px 16px 0;max-width:640px;margin:0 auto;}
-  .tab-btn{flex:1;padding:10px 8px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;color:#9A8870;cursor:pointer;font-family:'Manrope',sans-serif;}
-  .tab-btn.active{background:var(--ink);border-color:var(--ink);color:var(--cream);}
-  .tab-page{display:none;}
-  .tab-page.active{display:block;}
+header{padding:24px 20px 18px;background:var(--ink);color:var(--cream);display:flex;justify-content:space-between;}
+.dash-title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;}
+.logout-btn{border:1px solid #6B5C48;background:none;color:white;padding:7px 12px;border-radius:8px;cursor:pointer;}
 
-  .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 0;max-width:640px;margin:0 auto;}
-  .stat-box{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center;}
-  .stat-num{font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:var(--terracotta-dark);}
-  .stat-label{font-size:11px;color:#9A8870;margin-top:2px;text-transform:uppercase;letter-spacing:0.03em;}
-  .sales-banner{max-width:640px;margin:14px auto 0;padding:0 16px;font-size:13px;font-weight:600;color:#8A7860;text-align:right;}
+.tab-row{display:flex;gap:6px;padding:14px;}
+.tab-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);cursor:pointer;}
+.tab-btn.active{background:var(--ink);color:white;}
 
-  main{padding:16px;max-width:640px;margin:0 auto;}
-  .empty-state{text-align:center;padding:60px 20px;color:#9A8870;}
-  .empty-icon{font-size:40px;margin-bottom:10px;}
-  .refresh-note{text-align:center;font-size:12px;color:#9A8870;padding:14px 0 0;}
+.tab-page{display:none;}
+.tab-page.active{display:block;}
 
-  .order-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;}
-  .pending-card{border:1.5px solid var(--pending);background:#FFF6F4;}
-  .pending-banner{font-size:11px;font-weight:700;color:var(--pending);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
-  .order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-  .order-id{font-family:'Fraunces',serif;font-weight:700;font-size:16px;}
-  .queue-tag{font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;color:var(--terracotta-dark);background:#F3E3CC;padding:2px 8px;border-radius:100px;margin-left:6px;vertical-align:middle;}
-  .order-meta{font-size:12px;color:#9A8870;margin-top:2px;}
-  .status-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;color:white;text-transform:uppercase;letter-spacing:0.03em;flex-shrink:0;}
-  .status-pending{background:var(--pending);}
-  .status-new{background:var(--terracotta);}
-  .status-making{background:var(--making);}
-  .status-done{background:var(--done);}
-  .order-items{border-top:1px solid var(--line);padding-top:10px;margin-bottom:10px;}
-  .order-line{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0;}
-  .order-total{display:flex;justify-content:space-between;font-weight:700;font-size:14px;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;}
-  .order-actions,.approve-row{display:flex;gap:8px;margin-top:12px;}
-  .action-btn{flex:1;border:1.5px solid var(--line);background:white;border-radius:9px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink);}
-  .action-btn.active-making{border-color:var(--making);background:var(--making);color:white;}
-  .action-btn.active-done{border-color:var(--done);background:var(--done);color:white;}
-  .approve-btn{flex:1;border:none;background:var(--leaf);color:white;border-radius:9px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;}
-  .reject-btn{flex:1;border:1.5px solid var(--pending);background:white;color:var(--pending);border-radius:9px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+.stat-box{background:var(--card);border:1px solid var(--line);padding:12px;text-align:center;border-radius:10px;}
+.stat-num{font-size:22px;font-weight:700;color:var(--terracotta-dark);}
 
-  .menu-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-  .menu-toolbar h2{font-family:'Fraunces',serif;font-size:18px;font-weight:700;}
-  .add-product-btn{background:var(--terracotta);color:white;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;}
-  .product-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
-  .product-info .pname{font-weight:700;font-size:15px;}
-  .product-info .pcat{font-size:11.5px;color:#9A8870;margin-top:2px;}
-  .product-info .pdesc{font-size:12.5px;color:#9A8870;margin-top:3px;}
-  .product-info .pprice{font-family:'Fraunces',serif;font-weight:700;font-size:14.5px;color:var(--terracotta-dark);margin-top:5px;}
-  .product-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
-  .pact-btn{border:1.5px solid var(--line);background:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink);}
-  .pact-btn.danger{border-color:#C77A6A;color:#C77A6A;}
-  .pact-btn.toggle-off{background:#F0E8D8;color:#9A8870;}
+.order-card{background:white;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;}
+.status-pill{padding:4px 10px;border-radius:20px;color:white;font-size:11px;}
 
-  .form-overlay{position:fixed;inset:0;background:rgba(43,33,24,0.5);display:none;align-items:flex-end;z-index:40;}
-  .form-overlay.show{display:flex;}
-  .form-sheet{background:var(--cream);width:100%;max-height:90vh;border-radius:20px 20px 0 0;padding:22px 20px 26px;overflow-y:auto;}
-  .form-sheet h3{font-family:'Fraunces',serif;font-size:20px;font-weight:700;margin-bottom:16px;}
-  .form-field{margin-bottom:14px;}
-  .form-field label{font-size:12px;font-weight:600;color:#8A7860;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;}
-  .form-field input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-family:'Manrope',sans-serif;font-size:14px;background:white;}
-  .form-save-btn{width:100%;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:14px;font-size:14.5px;font-weight:700;margin-top:6px;cursor:pointer;}
-  .form-cancel{text-align:center;margin-top:12px;font-size:13px;color:#9A8870;cursor:pointer;}
+.status-pending{background:var(--pending);}
+.status-new{background:var(--terracotta);}
+.status-making{background:var(--making);}
+.status-done{background:var(--done);}
 
-  .qr-setup-row{display:flex;gap:10px;margin-bottom:18px;align-items:flex-end;}
-  .qr-setup-row .form-field{flex:1;margin-bottom:0;}
-  .qr-generate-btn{background:var(--terracotta);color:white;border:none;border-radius:10px;padding:11px 16px;font-size:13.5px;font-weight:700;cursor:pointer;height:42px;}
-  .qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .qr-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px;text-align:center;}
-  .qr-card img,.qr-card canvas{width:100%;max-width:140px;margin:0 auto 8px;display:block;}
-  .qr-card .qr-label{font-family:'Fraunces',serif;font-weight:700;font-size:14px;}
-  .qr-card .qr-sub{font-size:9.5px;color:#9A8870;margin-top:2px;word-break:break-all;}
-  .qr-card.takeaway{border-color:var(--leaf);background:#F4F8F1;}
-  .qr-section-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--terracotta-dark);text-transform:uppercase;letter-spacing:0.05em;margin:22px 0 10px;}
-  .qr-section-title:first-child{margin-top:0;}
-  .qr-print-btn{display:block;width:100%;margin-top:18px;background:var(--ink);color:var(--cream);border:none;border-radius:10px;padding:12px;font-size:13.5px;font-weight:700;cursor:pointer;}
+.action-btn{padding:8px;border:1px solid var(--line);border-radius:8px;cursor:pointer;}
 
-  .full-error{max-width:420px;margin:60px auto;padding:0 24px;text-align:center;}
-  .full-error .icon{font-size:46px;margin-bottom:12px;}
-  .full-error .title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:var(--ink);margin-bottom:8px;}
-  .full-error .sub{font-size:14px;color:#8A7860;}
+.product-card{background:white;padding:12px;border-radius:12px;margin-bottom:10px;border:1px solid var(--line);}
+.product-actions button{margin-right:5px;}
 
-  #loadingScreen{display:block;}
+.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;}
+.form-overlay.show{display:flex;align-items:flex-end;}
+.form-sheet{background:white;width:100%;padding:20px;border-radius:20px 20px 0 0;}
 
-  @media print{
-    header,.tab-row,.stats-row,.sales-banner,.qr-setup-row,.qr-print-btn,.refresh-note{display:none !important;}
-  }
+.qr-card{background:white;border:1px solid var(--line);padding:10px;border-radius:10px;margin:10px;}
 </style>
 </head>
+
 <body>
 
-<div class="full-error" id="loadingScreen">
-  <div class="icon">⏳</div>
-  <div class="title">Loading…</div>
+<div id="mainApp">
+
+<header>
+  <div>
+    <div class="dash-title" id="shopNameDisplay">Owner Dashboard</div>
+    <div style="font-size:12px;">Live Orders</div>
+  </div>
+  <button class="logout-btn" onclick="handleLogout()">Logout</button>
+</header>
+
+<div class="tab-row">
+  <button class="tab-btn active" onclick="switchTab('orders')">Orders</button>
+  <button class="tab-btn" onclick="switchTab('menu')">Menu</button>
+  <button class="tab-btn" onclick="switchTab('qr')">QR</button>
 </div>
 
-<div id="mainApp" style="display:none;">
-  <header>
-    <div>
-      <div class="dash-title" id="shopNameDisplay">Owner Dashboard</div>
-      <div class="dash-sub">Live Orders</div>
-    </div>
-    <button class="logout-btn" onclick="handleLogout()">Log Out</button>
-  </header>
-
-  <div class="tab-row">
-    <button class="tab-btn active" id="tabBtnOrders" onclick="switchTab('orders')">📋 Orders</button>
-    <button class="tab-btn" id="tabBtnMenu" onclick="switchTab('menu')">🍽 Menu</button>
-    <button class="tab-btn" id="tabBtnQr" onclick="switchTab('qr')">📱 QR Codes</button>
+<!-- ORDERS -->
+<div class="tab-page active" id="pageOrders">
+  <div class="stats-row">
+    <div class="stat-box"><div id="statPending">0</div><div>Pending</div></div>
+    <div class="stat-box"><div id="statQueue">0</div><div>Queue</div></div>
   </div>
 
-  <div class="tab-page active" id="pageOrders">
-    <div class="stats-row">
-      <div class="stat-box"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending Approval</div></div>
-      <div class="stat-box"><div class="stat-num" id="statQueue">0</div><div class="stat-label">In Queue (Accepted)</div></div>
-      <div class="stat-box"><div class="stat-num" id="statDineIn">0</div><div class="stat-label">🍽 Dine-in Waiting</div></div>
-      <div class="stat-box"><div class="stat-num" id="statTakeaway">0</div><div class="stat-label">🛍 Takeaway Waiting</div></div>
-    </div>
-    <div class="sales-banner" id="salesBanner">Today's Sales: Rs 0</div>
-    <main id="ordersList"></main>
-    <div class="refresh-note">Orders update live — no refresh needed</div>
-  </div>
+  <div id="ordersList"></div>
+</div>
 
-  <div class="tab-page" id="pageMenu">
-    <main style="padding-top:18px;">
-      <div class="menu-toolbar">
-        <h2>Your Products</h2>
-        <button class="add-product-btn" onclick="openProductForm()">+ Add Product</button>
-      </div>
-      <div id="productList"></div>
-    </main>
-  </div>
+<!-- MENU -->
+<div class="tab-page" id="pageMenu">
+  <button onclick="openProductForm()">+ Add Product</button>
+  <div id="productList"></div>
+</div>
 
-  <div class="tab-page" id="pageQr">
-    <main style="padding-top:18px;">
-      <div class="qr-setup-row">
-        <div class="form-field">
-          <label>Number of Tables</label>
-          <input type="number" id="tableCountInput" min="1" max="50" value="6">
-        </div>
-        <button class="qr-generate-btn" onclick="generateAllQrCodes()">Generate QR Codes</button>
-      </div>
-      <div id="qrCodesArea"></div>
-    </main>
-  </div>
+<!-- QR -->
+<div class="tab-page" id="pageQr">
+  <input id="tableCountInput" type="number" value="6">
+  <button onclick="generateAllQrCodes()">Generate QR</button>
+  <div id="qrCodesArea"></div>
+</div>
 
-  <div class="form-overlay" id="formOverlay">
-    <div class="form-sheet" id="formSheetContent"></div>
-  </div>
+<!-- FORM -->
+<div class="form-overlay" id="formOverlay">
+  <div class="form-sheet" id="formSheetContent"></div>
+</div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB2_c5iNacAvOSryCkfE1Th2tAwFoy9bmw",
@@ -182,203 +115,154 @@ const firebaseConfig = {
   messagingSenderId: "370357744472",
   appId: "1:370357744472:web:a50a84bf3ab8a7d262ab2d"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentShopId = null;
-let unsubOrders = null;
+let currentShopId=null;
+let products=[];
 
-function setLoadingError(title, sub){
-  document.getElementById('loadingScreen').innerHTML =
-    `<div class="icon">⚠️</div><div class="title">${title}</div><div class="sub">${sub}</div>`;
-}
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
 
-auth.onAuthStateChanged(async user => {
-  if(!user){ window.location.href = 'login.html'; return; }
-  try {
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if(!userDoc.exists){ setLoadingError('Shop Not Found','No shop linked to your account.'); return; }
-    currentShopId = userDoc.data().shopId;
-    const shopDoc = await db.collection('shops').doc(currentShopId).get();
-    if(!shopDoc.exists){ setLoadingError('Shop Not Found','Shop data missing.'); return; }
-    const shop = shopDoc.data();
-    document.getElementById('shopNameDisplay').textContent = shop.shopName || 'My Shop';
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    listenOrders();
-    loadProducts();
-  } catch(e){
-    setLoadingError('Error', e.message);
-  }
+  const userDoc=await db.collection("users").doc(user.uid).get();
+  currentShopId=userDoc.data().shopId;
+
+  const shop=await db.collection("shops").doc(currentShopId).get();
+  document.getElementById("shopNameDisplay").innerText=shop.data().shopName;
+
+  listenOrders();
+  loadProducts();
 });
-
-function handleLogout(){
-  if(unsubOrders) unsubOrders();
-  auth.signOut().then(() => window.location.href = 'login.html');
-}
-
-// ===== TABS =====
-function switchTab(tab){
-  ['orders','menu','qr'].forEach(t => {
-    document.getElementById('tabBtn' + t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
-    document.getElementById('page' + t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
-  });
-}
 
 // ===== ORDERS =====
 function listenOrders(){
-  const today = new Date(); today.setHours(0,0,0,0);
-  unsubOrders = db.collection('shops').doc(currentShopId).collection('orders')
-    .where('status','in',['pending','new','making','done'])
-    .orderBy('createdAt','asc')
-    .onSnapshot(snap => {
-      const orders = snap.docs.map(d => ({id:d.id,...d.data()}));
-      renderOrders(orders, today);
-    });
+  db.collection("shops").doc(currentShopId).collection("orders")
+  .onSnapshot(snap=>{
+    const orders=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderOrders(orders);
+  });
 }
 
-function renderOrders(orders, today){
-  const active = orders.filter(o => o.status !== 'done');
-  const done   = orders.filter(o => o.status === 'done');
+function renderOrders(orders){
+  let html="";
+  let pending=0,queue=0;
 
-  let pending=0, queue=0, dineIn=0, takeaway=0, sales=0;
-  orders.forEach(o => {
-    if(o.status==='pending') pending++;
-    if(o.status==='new'||o.status==='making') queue++;
-    if((o.status==='new'||o.status==='making') && o.orderType==='dinein') dineIn++;
-    if((o.status==='new'||o.status==='making') && o.orderType==='takeaway') takeaway++;
-    if(o.status==='done' && o.createdAt?.toDate() >= today) sales += o.total||0;
-  });
-  document.getElementById('statPending').textContent = pending;
-  document.getElementById('statQueue').textContent = queue;
-  document.getElementById('statDineIn').textContent = dineIn;
-  document.getElementById('statTakeaway').textContent = takeaway;
-  document.getElementById('salesBanner').textContent = "Today's Sales: Rs " + sales;
+  orders.forEach(o=>{
+    if(o.status==="pending") pending++;
+    if(o.status==="new"||o.status==="making") queue++;
 
-  const list = document.getElementById('ordersList');
-  if(!active.length && !done.length){
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>No orders yet</div></div>';
-    return;
-  }
-
-  let html = '';
-  let queueNum = 0;
-
-  active.forEach(o => {
-    if(o.status==='new'||o.status==='making') queueNum++;
-    html += buildOrderCard(o, queueNum);
-  });
-  if(done.length){
-    html += '<div style="font-size:12px;color:#9A8870;text-align:center;margin:14px 0 6px;">✅ Completed Today</div>';
-    done.forEach(o => { html += buildOrderCard(o, 0); });
-  }
-  list.innerHTML = html;
-}
-
-function buildOrderCard(o, queueNum){
-  const isPending = o.status === 'pending';
-  const typeLabel = o.orderType === 'takeaway' ? '🛍 Takeaway' : `🍽 Table ${o.table||'?'}`;
-  const time = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-  const items = (o.items||[]).map(i => `<div class="order-line"><span>${i.name} × ${i.qty}</span><span>Rs ${i.price*i.qty}</span></div>`).join('');
-  const qTag = queueNum ? `<span class="queue-tag">#${queueNum}</span>` : '';
-
-  const statusClass = {pending:'status-pending',new:'status-new',making:'status-making',done:'status-done'}[o.status]||'';
-  const statusLabel = {pending:'Pending',new:'Accepted',making:'Making',done:'Ready'}[o.status]||o.status;
-
-  let actions = '';
-  if(isPending){
-    actions = `<div class="approve-row">
-      <button class="approve-btn" onclick="approveOrder('${o.id}')">✅ Accept</button>
-      <button class="reject-btn" onclick="rejectOrder('${o.id}')">✗ Reject</button>
-    </div>`;
-  } else if(o.status !== 'done'){
-    actions = `<div class="order-actions">
-      <button class="action-btn ${o.status==='making'?'active-making':''}" onclick="setStatus('${o.id}','making')">🍳 Making</button>
-      <button class="action-btn ${o.status==='done'?'active-done':''}" onclick="setStatus('${o.id}','done')">✅ Done</button>
-    </div>`;
-  }
-
-  return `<div class="order-card ${isPending?'pending-card':''}">
-    ${isPending?'<div class="pending-banner">⚠ Awaiting Approval</div>':''}
-    <div class="order-top">
+    html+=`
+    <div class="order-card">
+      <b>#${o.shortCode||o.id.slice(-4)}</b>
+      <div>${o.name||"Guest"}</div>
+      <span class="status-pill status-${o.status}">${o.status}</span>
       <div>
-        <div class="order-id">#${o.shortCode||o.id.slice(-4)} ${qTag}</div>
-        <div class="order-meta">${o.name||'Guest'} · ${typeLabel} · ${time}</div>
+        <button onclick="setStatus('${o.id}','making')">Making</button>
+        <button onclick="setStatus('${o.id}','done')">Done</button>
       </div>
-      <span class="status-pill ${statusClass}">${statusLabel}</span>
-    </div>
-    <div class="order-items">${items}
-      <div class="order-total"><span>Total</span><span>Rs ${o.total||0}</span></div>
-    </div>
-    ${actions}
-  </div>`;
+    </div>`;
+  });
+
+  document.getElementById("ordersList").innerHTML=html;
+  document.getElementById("statPending").innerText=pending;
+  document.getElementById("statQueue").innerText=queue;
 }
 
-function approveOrder(id){
-  db.collection('shops').doc(currentShopId).collection('orders').doc(id).update({status:'new'});
-}
-function rejectOrder(id){
-  if(confirm('Reject this order?'))
-    db.collection('shops').doc(currentShopId).collection('orders').doc(id).delete();
-}
-function setStatus(id, status){
-  db.collection('shops').doc(currentShopId).collection('orders').doc(id).update({status});
+function setStatus(id,status){
+  db.collection("shops").doc(currentShopId).collection("orders").doc(id).update({status});
 }
 
 // ===== PRODUCTS =====
-let products = [];
-
 async function loadProducts(){
-  const snap = await db.collection('shops').doc(currentShopId).collection('products')
-    .orderBy('createdAt','asc').get();
-  products = snap.docs.map(d => ({id:d.id,...d.data()}));
+  const snap=await db.collection("shops").doc(currentShopId).collection("products").get();
+  products=snap.docs.map(d=>({id:d.id,...d.data()}));
   renderProducts();
 }
 
 function renderProducts(){
-  const el = document.getElementById('productList');
-  if(!products.length){
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽</div><div>No products yet. Add your first one!</div></div>';
-    return;
-  }
-  el.innerHTML = products.map(p => `
-    <div class="product-card">
-      <div class="product-info">
-        <div class="pname">${p.name}</div>
-        <div class="pcat">${p.category||''}</div>
-        <div class="pdesc">${p.desc||''}</div>
-        <div class="pprice">Rs ${p.price}</div>
-      </div>
-      <div class="product-actions">
-        <button class="pact-btn ${p.available===false?'toggle-off':''}" onclick="toggleProduct('${p.id}',${p.available!==false})">${p.available===false?'Off':'On'}</button>
-        <button class="pact-btn" onclick="openProductForm('${p.id}')">Edit</button>
-        <button class="pact-btn danger" onclick="deleteProduct('${p.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
+  document.getElementById("productList").innerHTML=
+  products.map(p=>`
+  <div class="product-card">
+    <b>${p.name}</b>
+    <div>Rs ${p.price}</div>
+    <button onclick="deleteProduct('${p.id}')">Delete</button>
+  </div>`).join("");
 }
 
 function openProductForm(editId){
-  const p = editId ? products.find(x => x.id===editId) : null;
-  document.getElementById('formSheetContent').innerHTML = `
-    <h3>${p ? 'Edit Product' : 'Add Product'}</h3>
-    <div class="form-field"><label>Name</label><input id="fName" value="${p?p.name:''}"></div>
-    <div class="form-field"><label>Category</label><input id="fCat" value="${p?p.category||'':''}"></div>
-    <div class="form-field"><label>Description</label><input id="fDesc" value="${p?p.desc||'':''}"></div>
-    <div class="form-field"><label>Price (Rs)</label><input id="fPrice" type="number" value="${p?p.price:''}"></div>
-    <button class="form-save-btn" onclick="saveProduct('${editId||''}')">Save</button>
-    <div class="form-cancel" onclick="closeForm()">Cancel</div>
+  const p=products.find(x=>x.id===editId)||{};
+  document.getElementById("formSheetContent").innerHTML=`
+    <h3>Product</h3>
+    <input id="name" placeholder="Name" value="${p.name||''}">
+    <input id="price" placeholder="Price" value="${p.price||''}">
+    <button onclick="saveProduct('${editId||''}')">Save</button>
   `;
-  document.getElementById('formOverlay').classList.add('show');
+  document.getElementById("formOverlay").classList.add("show");
 }
 
 async function saveProduct(editId){
-  const data = {
-    name: document.getElementById('fName').value.trim(),
-    category: document.getElementById('fCat').value.trim(),
-    desc: document.getElementById('fDesc').value.trim(),
-    price: parseFloat(document.getElementById('fPrice').value)||0,
-    available: true
+  const data={
+    name:document.getElementById("name").value,
+    price:parseFloat(document.getElementById("price").value)||0
   };
-  if(!data.name){ 
+
+  if(!data.name) return alert("Name required");
+
+  const ref=db.collection("shops").doc(currentShopId).collection("products");
+
+  if(editId) await ref.doc(editId).update(data);
+  else await ref.add(data);
+
+  closeForm();
+  loadProducts();
+}
+
+function closeForm(){
+  document.getElementById("formOverlay").classList.remove("show");
+}
+
+async function deleteProduct(id){
+  await db.collection("shops").doc(currentShopId).collection("products").doc(id).delete();
+  loadProducts();
+}
+
+// ===== QR =====
+function generateAllQrCodes(){
+  const count=document.getElementById("tableCountInput").value;
+  const area=document.getElementById("qrCodesArea");
+  area.innerHTML="";
+
+  for(let i=1;i<=count;i++){
+    const div=document.createElement("div");
+    new QRCode(div,{
+      text:`${location.origin}/customer.html?shop=${currentShopId}&table=${i}`,
+      width:120,
+      height:120
+    });
+
+    const wrap=document.createElement("div");
+    wrap.className="qr-card";
+    wrap.innerHTML=`<b>Table ${i}</b>`;
+    wrap.prepend(div);
+
+    area.appendChild(wrap);
+  }
+}
+
+// ===== TABS =====
+function switchTab(tab){
+  ["orders","menu","qr"].forEach(t=>{
+    document.getElementById("page"+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove("active");
+  });
+  document.getElementById("page"+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add("active");
+}
+
+function handleLogout(){
+  auth.signOut().then(()=>window.location.href="login.html");
+}
+</script>
+
+</body>
+</html>
