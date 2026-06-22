@@ -349,6 +349,32 @@ function finishOrder(){
 }
 
 initCustomerView();
+  function generateAllQrCodes(){
+  const count=document.getElementById("tableCountInput").value;
+  const area=document.getElementById("qrCodesArea");
+  area.innerHTML="";
+
+  const baseUrl = "https://noshadhaider.github.io/Shop_owner";
+
+  for(let i=1;i<=count;i++){
+    const wrap=document.createElement("div");
+    wrap.className="qr-card";
+
+    const qrDiv=document.createElement("div");
+
+    new QRCode(qrDiv,{
+      text:`${baseUrl}/customer.html?shop=${currentShopId}&table=${i}`,
+      width:140,
+      height:140
+    });
+
+    wrap.appendChild(qrDiv);
+    wrap.innerHTML += `<b>Table ${i}</b>`;
+
+    area.appendChild(wrap);
+  }
+  }
+  
 </script>
 </body>
 </html>
