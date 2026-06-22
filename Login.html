@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Owner Login</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --cream:#FBF4E6; --ink:#2B2118; --terracotta:#C1582B;
+    --terracotta-dark:#9E4521; --leaf:#5B7A4F; --line:#E3D5BC;
+    --card:#FFFDF8; --error:#A33B3B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Manrope',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .auth-card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:32px 26px;max-width:380px;width:100%;}
+  .brand{text-align:center;margin-bottom:24px;}
+  .brand-icon{font-size:38px;margin-bottom:8px;}
+  .brand-title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;}
+  .brand-sub{font-size:13px;color:#8A7860;margin-top:4px;}
+  .mode-toggle{display:flex;gap:6px;margin-bottom:22px;background:#F0E8D8;border-radius:10px;padding:4px;}
+  .mode-btn{flex:1;padding:9px;border:none;background:none;border-radius:8px;font-size:13.5px;font-weight:700;color:#9A8870;cursor:pointer;font-family:'Manrope',sans-serif;}
+  .mode-btn.active{background:var(--card);color:var(--ink);}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;font-weight:600;color:#8A7860;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;}
+  .field input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-family:'Manrope',sans-serif;font-size:14px;background:white;}
+  .submit-btn{width:100%;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:14px;font-size:14.5px;font-weight:700;margin-top:6px;cursor:pointer;}
+  .submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .error-msg{background:#FFF1EF;border:1.5px solid var(--error);color:var(--error);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px;display:none;}
+  .error-msg.show{display:block;}
+  .signup-only{display:none;}
+  .signup-only.show{display:block;}
+  .hint{font-size:11.5px;color:#9A8870;margin-top:8px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="auth-card">
+  <div class="brand">
+    <div class="brand-icon">🍵</div>
+    <div class="brand-title">Shop Owner Login</div>
+    <div class="brand-sub">Manage your menu &amp; orders</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeLoginBtn" onclick="setAuthMode('login')">Log In</button>
+    <button class="mode-btn" id="modeSignupBtn" onclick="setAuthMode('signup')">Sign Up</button>
+  </div>
+
+  <div class="error-msg" id="authErrorMsg"></div>
+
+  <div id="shopNameField" class="field signup-only">
+    <label>Shop Name</label>
+    <input type="text" id="authShopName" placeholder="e.g. Karachi Chai Point">
+  </div>
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="authEmail" placeholder="you@example.com">
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="authPassword" placeholder="At least 6 characters">
+  </div>
+  <button class="submit-btn" id="authSubmitBtn" onclick="handleAuthSubmit()">Log In</button>
+  <div class="hint" id="authHintText">Don't have an account? Tap "Sign Up" above.</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB2_c5iNacAvOSryCkfE1Th2tAwFoy9bmw",
+  authDomain: "shopowner-54b53.firebaseapp.com",
+  projectId: "shopowner-54b53",
+  storageBucket: "shopowner-54b53.firebasestorage.app",
+  messagingSenderId: "370357744472",
+  appId: "1:370357744472:web:a50a84bf3ab8a7d262ab2d"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Agar already logged in hai to seedha dashboard pe bhejo
+auth.onAuthStateChanged(user => {
+  if(user) window.location.href = 'dashboard.html';
+});
+
+let authMode = 'login';
+
+function setAuthMode(mode){
+  authMode = mode;
+  document.getElementById('modeLoginBtn').classList.toggle('active', mode==='login');
+  document.getElementById('modeSignupBtn').classList.toggle('active', mode==='signup');
+  document.getElementById('shopNameField').classList.toggle('show', mode==='signup');
+  document.getElementById('authSubmitBtn').textContent = mode==='signup' ? 'Create Account' : 'Log In';
+  document.getElementById('authHintText').textContent = mode==='signup'
+    ? 'Already have an account? Tap "Log In" above.'
+    : 'Don\'t have an account? Tap "Sign Up" above.';
+  hideAuthError();
+}
+
+function showAuthError(msg){
+  const el = document.getElementById('authErrorMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAuthError(){
+  document.getElementById('authErrorMsg').classList.remove('show');
+}
+
+function generateRandomKey(){
+  return Math.random().toString(36).slice(2) + Date.now().toString(36).slice(-4);
+}
+
+async function handleAuthSubmit(){
+  hideAuthError();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+
+  try {
+    if(authMode === 'signup'){
+      const shopName = document.getElementById('authShopName').value.trim();
+      if(!shopName){ showAuthError('Please enter your shop name.'); btn.disabled=false; return; }
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      const uid = cred.user.uid;
+      const shopRef = db.collection('shops').doc();
+      await shopRef.set({
+        ownerUid: uid, shopName: shopName, shopTagline: '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        takeawayKey: generateRandomKey()
+      });
+      await db.collection('users').doc(uid).set({ shopId: shopRef.id });
+      window.location.href = 'dashboard.html';
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+      window.location.href = 'dashboard.html';
+    }
+  } catch(err){
+    showAuthError(friendlyAuthError(err));
+    btn.disabled = false;
+  }
+}
+
+function friendlyAuthError(err){
+  const map = {
+    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/invalid-email':'Please enter a valid email address.',
+    'auth/weak-password':'Password should be at least 6 characters.',
+    'auth/user-not-found':'No account found with this email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/invalid-credential':'Incorrect email or password.',
+    'auth/too-many-requests':'Too many attempts. Please wait.'
+  };
+  return map[err.code] || ('Something went wrong: ' + err.message);
+}
+</script>
+</body>
+</html>
