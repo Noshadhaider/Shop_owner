@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Menu</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --cream:#FBF4E6; --ink:#2B2118; --terracotta:#C1582B;
+    --terracotta-dark:#9E4521; --leaf:#5B7A4F; --line:#E3D5BC; --card:#FFFDF8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--ink);font-family:'Manrope',sans-serif;min-height:100vh;}
+
+  header{padding:28px 20px 22px;border-bottom:2px solid var(--line);background:var(--card);position:sticky;top:0;z-index:10;}
+  .shop-name{font-family:'Fraunces',serif;font-weight:700;font-size:28px;letter-spacing:-0.01em;}
+  .shop-tag{font-size:13px;color:#8A7860;margin-top:4px;letter-spacing:0.02em;}
+
+  main{padding:20px 16px 90px;max-width:560px;margin:0 auto;}
+  .category-label{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--terracotta-dark);text-transform:uppercase;letter-spacing:0.08em;margin:28px 4px 12px;}
+  .category-label:first-child{margin-top:8px;}
+
+  .item{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .item-info{flex:1;}
+  .item-name{font-size:16px;font-weight:600;}
+  .item-desc{font-size:13px;color:#9A8870;margin-top:2px;}
+  .item-price{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-top:6px;color:var(--terracotta-dark);}
+
+  .qty-control{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .qty-btn{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--terracotta);background:white;color:var(--terracotta);font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .add-btn{border-radius:8px;border:1.5px solid var(--terracotta);background:var(--terracotta);color:white;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;}
+  .qty-num{min-width:18px;text-align:center;font-weight:700;font-size:15px;}
+
+  .cart-bar{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--cream);padding:14px 20px;display:none;align-items:center;justify-content:space-between;cursor:pointer;z-index:20;}
+  .cart-bar.show{display:flex;}
+  .cart-bar-left{font-size:14px;font-weight:600;}
+  .cart-bar-left span{color:#C9A876;font-family:'Fraunces',serif;}
+  .cart-bar-right{background:var(--terracotta);color:white;font-weight:700;font-size:14px;padding:8px 16px;border-radius:8px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(43,33,24,0.5);display:none;z-index:30;align-items:flex-end;}
+  .overlay.show{display:flex;}
+  .sheet{background:var(--cream);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:22px 20px 24px;overflow-y:auto;}
+  .sheet-title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;margin-bottom:16px;}
+  .sheet-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .sheet-total{display:flex;justify-content:space-between;padding:16px 0 4px;font-family:'Fraunces',serif;font-weight:700;font-size:18px;}
+
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;font-weight:600;color:#8A7860;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;}
+  .field input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-family:'Manrope',sans-serif;font-size:14px;background:white;}
+
+  .type-toggle{display:flex;gap:8px;}
+  .type-btn{flex:1;border:1.5px solid var(--line);background:white;color:var(--ink);border-radius:10px;padding:11px 8px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;}
+  .type-btn.active{border-color:var(--terracotta);background:var(--terracotta);color:white;}
+  .locked-type-badge{background:#F4F8F1;border:1.5px solid var(--leaf);color:var(--leaf);border-radius:10px;padding:11px 12px;font-size:13.5px;font-weight:700;}
+
+  .place-order-btn{width:100%;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;margin-top:20px;cursor:pointer;}
+  .place-order-btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .close-sheet{text-align:center;margin-top:14px;font-size:13px;color:#9A8870;cursor:pointer;}
+
+  .confirm-screen{text-align:center;padding:30px 10px;}
+  .confirm-icon{font-size:46px;margin-bottom:10px;}
+  .status-ready .confirm-icon{animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+  .confirm-title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;margin-bottom:6px;}
+  .confirm-sub{font-size:14px;color:#8A7860;margin-bottom:18px;}
+  .order-code{display:inline-block;background:var(--card);border:1.5px dashed var(--terracotta);padding:8px 16px;border-radius:10px;font-family:'Fraunces',serif;font-weight:700;letter-spacing:0.05em;}
+  .status-track{display:flex;gap:6px;margin:22px 0 4px;}
+  .track-step{flex:1;font-size:10.5px;font-weight:700;text-align:center;padding:7px 2px;border-radius:8px;background:var(--line);color:#9A8870;text-transform:uppercase;letter-spacing:0.02em;}
+  .track-step.active{background:var(--terracotta);color:white;}
+  .track-step.done{background:var(--leaf);color:white;}
+  .new-order-btn{display:block;width:100%;margin-top:16px;background:var(--leaf);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;}
+
+  .full-error{max-width:420px;margin:60px auto;padding:0 24px;text-align:center;}
+  .full-error .icon{font-size:46px;margin-bottom:12px;}
+  .full-error .title{font-family:'Fraunces',serif;font-weight:700;font-size:22px;}
+  .full-error .sub{font-size:14px;color:#8A7860;}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen" class="full-error">
+  <div class="icon">⏳</div>
+  <div class="title">Loading menu…</div>
+</div>
+
+<div id="mainApp" style="display:none;">
+  <header>
+    <div class="shop-name" id="custShopNameDisplay"></div>
+    <div class="shop-tag" id="custShopTagDisplay"></div>
+  </header>
+
+  <main id="menuArea"></main>
+
+  <div class="cart-bar" id="cartBar" onclick="openCart()">
+    <div class="cart-bar-left"><span id="cartCount">0</span> items in cart</div>
+    <div class="cart-bar-right">View Cart · Rs <span id="cartTotal">0</span></div>
+  </div>
+
+  <div class="overlay" id="custOverlay">
+    <div class="sheet" id="custSheetContent"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB2_c5iNacAvOSryCkfE1Th2tAwFoy9bmw",
+  authDomain: "shopowner-54b53.firebaseapp.com",
+  projectId: "shopowner-54b53",
+  storageBucket: "shopowner-54b53.firebasestorage.app",
+  messagingSenderId: "370357744472",
+  appId: "1:370357744472:web:a50a84bf3ab8a7d262ab2d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const urlParams = new URLSearchParams(window.location.search);
+const custShopId = urlParams.get('shop');
+const urlTable = urlParams.get('table');
+const urlType = urlParams.get('type');
+
+let MENU = [];
+let cart = {};
+let selectedOrderType = urlTable ? 'dinein' : 'takeaway';
+let qrResult = { locked: !!(urlTable || urlType), table: urlTable };
+let statusPollUnsub = null;
+
+function showError(title, sub){
+  document.getElementById('loadingScreen').innerHTML =
+    `<div class="icon">⚠️</div><div class="title">${title}</div><div class="sub">${sub||''}</div>`;
+}
+
+async function initCustomerView(){
+  if(!custShopId){ showError('Invalid Link','No shop ID found in URL.'); return; }
+  try {
+    const shopDoc = await db.collection('shops').doc(custShopId).get();
+    if(!shopDoc.exists){ showError('Shop Not Found','This link is invalid or expired.'); return; }
+    const shop = shopDoc.data();
+    document.getElementById('custShopNameDisplay').textContent = shop.shopName || 'Our Menu';
+    document.getElementById('custShopTagDisplay').textContent = shop.shopTagline || '';
+
+    const snap = await db.collection('shops').doc(custShopId).collection('products')
+      .where('available','!=',false).orderBy('available').orderBy('createdAt','asc').get();
+    MENU = snap.docs.map(d => ({id:d.id,...d.data()}));
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    renderMenu();
+  } catch(e){
+    showError('Error', e.message);
+  }
+}
+
+function renderMenu(){
+  const main = document.getElementById('menuArea');
+  if(!MENU.length){
+    main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#9A8870;"><div style="font-size:40px;margin-bottom:10px;">🍽</div><div>No items available</div></div>';
+    updateCartBar();
+    return;
+  }
+
+  main.innerHTML = '';
+  const cats = [...new Set(MENU.map(i => i.category||''))];
+  cats.forEach(cat => {
+    if(cat){
+      const lbl = document.createElement('div');
+      lbl.className = 'category-label';
+      lbl.textContent = cat;
+      main.appendChild(lbl);
+    }
+    MENU.filter(i => (i.category||'') === cat).forEach(item => {
+      const qty = cart[item.id]||0;
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-desc">${item.desc||''}</div>
+          <div class="item-price">Rs ${item.price}</div>
+        </div>
+        <div class="qty-control" id="qty-${item.id}">
+          ${qty===0
+            ? `<button class="add-btn" onclick="changeQty('${item.id}',1)">Add</button>`
+            : `<button class="qty-btn" onclick="changeQty('${item.id}',-1)">–</button>
+               <span class="qty-num">${qty}</span>
+               <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>`
+          }
+        </div>
+      `;
+      main.appendChild(el);
+    });
+  });
+  updateCartBar();
+}
+
+function changeQty(id, delta){
+  cart[id] = (cart[id]||0) + delta;
+  if(cart[id] <= 0) delete cart[id];
+  renderMenu();
+}
+
+function cartTotalAmount(){
+  return Object.entries(cart).reduce((sum,[id,qty]) => {
+    const item = MENU.find(m => m.id===id);
+    return sum + (item ? item.price*qty : 0);
+  }, 0);
+}
+function cartTotalCount(){
+  return Object.values(cart).reduce((a,b)=>a+b,0);
+}
+function updateCartBar(){
+  const count = cartTotalCount();
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = cartTotalAmount();
+  document.getElementById('cartBar').classList.toggle('show', count>0);
+}
+
+function openCart(){
+  const lines = Object.entries(cart).map(([id,qty]) => {
+    const item = MENU.find(m => m.id===id);
+    return `<div class="sheet-item"><span>${item.name} × ${qty}</span><span>Rs ${item.price*qty}</span></div>`;
+  }).join('');
+
+  const locked = qrResult.locked;
+  const orderTypeBlock = locked
+    ? `<div class="field"><label>Order Type</label><div class="locked-type-badge">${selectedOrderType==='takeaway'?'🛍 Takeaway (verified from QR code)':'🍽 Dine-in — Table '+qrResult.table+' (verified from QR code)'}</div></div>`
+    : `<div class="field"><label>Order Type</label><div class="type-toggle">
+         <button class="type-btn active" id="typeDineIn" onclick="selectOrderType('dinein')">🍽 Dine-in</button>
+         <button class="type-btn" id="typeTakeaway" onclick="selectOrderType('takeaway')">🛍 Takeaway</button>
+       </div></div>`;
+
+  document.getElementById('custSheetContent').innerHTML = `
+    <div class="sheet-title">Your Order</div>
+    ${lines}
+    <div class="sheet-total"><span>Total</span><span>Rs ${cartTotalAmount()}</span></div>
+    ${orderTypeBlock}
+    <div class="field"><label>Your Name</label><input type="text" id="custName" placeholder="e.g. Ahmed"></div>
+    <button class="place-order-btn" id="placeBtn" onclick="placeOrder()">Place Order — Rs ${cartTotalAmount()}</button>
+    <div class="close-sheet" onclick="closeCustSheet()">Cancel</div>
+  `;
+  document.getElementById('custOverlay').classList.add('show');
+}
+
+function selectOrderType(type){
+  selectedOrderType = type;
+  document.getElementById('typeDineIn').classList.toggle('active', type==='dinein');
+  document.getElementById('typeTakeaway').classList.toggle('active', type==='takeaway');
+}
+function closeCustSheet(){
+  document.getElementById('custOverlay').classList.remove('show');
+}
+
+async function placeOrder(){
+  const btn = document.getElementById('placeBtn');
+  btn.disabled = true; btn.textContent = 'Placing order…';
+
+  const name = document.getElementById('custName').value.trim() || 'Guest';
+  const table = selectedOrderType==='dinein' ? qrResult.table : null;
+  const shortCode = Math.floor(1000 + Math.random()*9000);
+
+  const order = {
+    shortCode, name, table,
+    orderType: selectedOrderType,
+    items: Object.entries(cart).map(([id,qty]) => {
+      const item = MENU.find(m=>m.id===id);
+      return {name:item.name, qty, price:item.price};
+    }),
+    total: cartTotalAmount(),
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const docRef = await db.collection('shops').doc(custShopId).collection('orders').add(order);
+  showStatusScreen(docRef.id, shortCode);
+}
+
+const STATUS_INFO = {
+  pending:  {icon:'⏳', title:'Order Sent!',      sub:'Waiting for the shop to confirm your order'},
+  new:      {icon:'👍', title:'Order Accepted',    sub:'The kitchen will start preparing it soon'},
+  making:   {icon:'🍳', title:'Being Prepared',    sub:'Your order is being cooked right now'},
+  done:     {icon:'✅', title:'Ready!',            sub:'Your order is ready'}
+};
+
+function getStatusInfo(status, orderType){
+  const info = {...(STATUS_INFO[status]||STATUS_INFO.pending)};
+  if(status==='done'){
+    info.sub = orderType==='takeaway'
+      ? 'Your order is ready — please come and collect it from the counter'
+      : 'Your order is ready and will be served to your table shortly';
+  }
+  return info;
+}
+
+function showStatusScreen(orderDocId, shortCode){
+  document.getElementById('custOverlay').classList.add('show');
+  if(statusPollUnsub) statusPollUnsub();
+  statusPollUnsub = db.collection('shops').doc(custShopId).collection('orders').doc(orderDocId)
+    .onSnapshot(doc => {
+      if(!doc.exists){ renderStatusNotFound(); return; }
+      renderStatusScreen(doc.data(), shortCode);
+    });
+}
+
+let lastVibratedStatus = null;
+function renderStatusScreen(order, shortCode){
+  if(order.status==='done' && lastVibratedStatus!=='done'){
+    lastVibratedStatus = 'done';
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+  }
+  const info = getStatusInfo(order.status, order.orderType);
+  const readyClass = order.status==='done' ? 'status-ready' : '';
+  document.getElementById('custSheetContent').innerHTML = `
+    <div class="confirm-screen ${readyClass}">
+      <div class="confirm-icon">${info.icon}</div>
+      <div class="confirm-title">${info.title}</div>
+      <div class="confirm-sub">${info.sub}</div>
+      <div class="order-code">#${shortCode}</div>
+      <div class="status-track">
+        <div class="track-step ${order.status!=='pending'?'done':'active'}">Sent</div>
+        <div class="track-step ${order.status==='making'||order.status==='done'?'done':(order.status==='new'?'active':'')}">Accepted</div>
+        <div class="track-step ${order.status==='done'?'done':(order.status==='making'?'active':'')}">Making</div>
+        <div class="track-step ${order.status==='done'?'active':''}">Ready</div>
+      </div>
+      <button class="new-order-btn" onclick="finishOrder()">Place Another Order</button>
+    </div>
+  `;
+}
+
+function renderStatusNotFound(){
+  document.getElementById('custSheetContent').innerHTML = `
+    <div class="confirm-screen">
+      <div class="confirm-icon">❓</div>
+      <div class="confirm-title">Order Not Found</div>
+      <div class="confirm-sub">This order may have been removed</div>
+      <button class="new-order-btn" onclick="finishOrder()">Place New Order</button>
+    </div>
+  `;
+}
+
+function finishOrder(){
+  if(statusPollUnsub) statusPollUnsub();
+  cart = {};
+  renderMenu();
+  closeCustSheet();
+}
+
+initCustomerView();
+</script>
+</body>
+</html>
